@@ -10,7 +10,7 @@ namespace ERS.Controllers
 {
     public class EventController : Controller
     {
-        // GET: Event
+    
         public ActionResult Index()
         {
            
@@ -22,19 +22,18 @@ namespace ERS.Controllers
             return View(events);
         }
 
-        // GET: Event/Details/5
+   
         public ActionResult Details(int id)
         {
             return View();
         }
 
-        // GET: Event/Create
+ 
         public ActionResult Create()
         {
             return View();
         }
-
-        // POST: Event/Create
+ 
         [HttpPost]
         public ActionResult Create(Event e)
         {
