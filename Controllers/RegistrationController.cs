@@ -11,47 +11,57 @@ namespace ERS.Controllers
     public class RegistrationController : Controller
     {
         public ActionResult Index(int eventId, string eventName)
-        {
-            if (eventName == null)
-            {
-                EventService es = new EventService();
-                var events = es.GetAllEvents();
-                eventName = events.FirstOrDefault(e => e.EventId == eventId).EventName;
-            }
-            RegistrationService registrationService = new RegistrationService();
-            var registrations = registrationService.GetAllRegistrations(eventId);
+{
+    // Check if eventName is null
+    if (string.IsNullOrEmpty(eventName))
+    {
+        // Fetch event name if not provided
+        EventService eventService = new EventService();
+        var events = eventService.GetAllEvents();
+        var selectedEvent = events.FirstOrDefault(e => e.EventId == eventId);
+        if (selectedEvent != null)
+            eventName = selectedEvent.EventName;
+    }
 
-            TempData["eventId"] = eventId;
-            TempData["eventName"] = eventName;
+    // Retrieve registrations for the specified event
+    RegistrationService registrationService = new RegistrationService();
+    var registrations = registrationService.GetAllRegistrations(eventId);
 
-            return View(registrations);
-        }
+    // Store eventId and eventName in TempData
+    TempData["eventId"] = eventId;
+    TempData["eventName"] = eventName;
 
+    return View(registrations);
+}
 
-        public ActionResult Create()
-        {
-            Registration registration = null;
+public ActionResult Create()
+{
+    Registration registration = null;
+    int eventId = (int)TempData["eventId"];
 
-            int eventId = (int)TempData["eventId"];
+    // Create new registration if eventId is not 0
+    if (eventId != 0)
+        registration = new Registration() { EventId = eventId, RegistrationDate = null };
 
-            if (eventId != 0)
-                registration = new Registration() { EventId = eventId, RegistrationDate = null };
+    // Fetch all events
+    EventService eventService = new EventService();
+    var events = eventService.GetAllEvents();
 
-            EventService es = new EventService();
-            var events = es.GetAllEvents();
+    // Create SelectListItem for each event
+    var eventItems = events.Select(e => new SelectListItem
+    {
+        Text = e.EventName,
+        Value = e.EventId.ToString()
+    }).ToList();
 
-            var eventItems = events.Select(e => new SelectListItem
-            {
-                Text = e.EventName,
-                Value = e.EventId.ToString()
-            }).ToList();
-            TempData["eventsList"] = eventItems;
+    // Store eventItems in TempData
+    TempData["eventsList"] = eventItems;
 
-            TempData.Keep();
+    // Retain TempData
+    TempData.Keep();
 
-            return View(registration);
-        }
-
+    return View(registration);
+}
         [HttpPost]
         public ActionResult Create(Registration registration)
         {
